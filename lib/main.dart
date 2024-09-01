@@ -55,6 +55,15 @@ class SearchPanel extends StatelessWidget {
       child: const Column(
         children: [
           SearchPanelText(),
+          SearchPanelInput(
+            inputName: "キーワード",
+          ),
+          SearchPanelInput(
+            inputName: "価格",
+          ),
+          SearchPanelInput(
+            inputName: "メーカー",
+          ),
         ],
       ),
     );
@@ -115,4 +124,44 @@ enum ItemCategory {
 
   const ItemCategory(this.label);
   final String label;
+}
+
+class SearchPanelInput extends StatefulWidget {
+  final String inputName;
+  const SearchPanelInput({super.key, required this.inputName});
+
+  @override
+  State<SearchPanelInput> createState() => _SearchPanelInputState();
+}
+
+class _SearchPanelInputState extends State<SearchPanelInput> {
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 2.0),
+              child: Text(widget.inputName,
+                  style: const TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.w100,
+                  )),
+            ),
+            const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                child: SizedBox(
+                    child: TextField(
+                  style: TextStyle(fontSize: 32),
+                  decoration: InputDecoration(
+                    suffixIcon: Icon(Icons.clear),
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                  ),
+                )))
+          ],
+        ));
+  }
 }
