@@ -205,3 +205,145 @@ class _SearchPanelInputBoxState extends State<SearchPanelInputBox> {
     );
   }
 }
+
+class ItemData extends StatelessWidget {
+  const ItemData({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        ItemDataThumbnail(
+          title: "Pulsar Xlite V3 Midium",
+          imgURL: "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
+        ),
+        ItemDataText(texts: ["Size: S/M/L", "Colors: Black / Red / White", "Connection: Wireless / Wired", "50g", "8000Hz"],)
+      ],
+    );
+  }
+}
+
+class ItemDataThumbnail extends StatelessWidget {
+  final String title;
+  final String imgURL;
+  const ItemDataThumbnail({super.key, required this.title, required this.imgURL});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.network(
+              "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
+              width: 128,
+              height: 128,
+            )
+          ),
+          Flexible(
+            child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 8),
+                      child: ItemDataThumbnailButtons(),
+                    )
+                  ],
+                )
+            ),
+          ),
+        ],
+      )
+    );
+  }
+}
+
+class ItemDataThumbnailButtons extends StatelessWidget {
+  const ItemDataThumbnailButtons({super.key});
+
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          child: const Text(
+            "Details",
+            style: TextStyle(
+              fontSize: 12
+            ),
+          ),
+        ),
+        const SizedBox(width: 16),
+        ElevatedButton(
+          onPressed: () {},
+          style: ElevatedButton.styleFrom(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+          child: const Text(
+            "Official Site",
+            style: TextStyle(
+                fontSize: 12
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+}
+
+class ItemDataText extends StatelessWidget {
+  final List<String> texts;
+  const ItemDataText({super.key, required this.texts});
+
+  @override
+  Widget build(BuildContext context) {
+    return Wrap(
+      children: texts.map((text) => Padding(
+        padding: const EdgeInsets.only(right: 8),
+        child: Text(
+          text,
+          style: const TextStyle(
+            fontSize: 16
+          ),
+        )
+      )).toList(),
+    );
+  }
+}
+
+enum ItemCategory {
+  keyboard("キーボード"),
+  monitor("モニター"),
+  mouse("マウス"),
+  headset("ヘッドセット");
+
+  const ItemCategory(this.label);
+  final String label;
+}
