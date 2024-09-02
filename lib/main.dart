@@ -46,12 +46,10 @@ class Home extends StatelessWidget {
         ],
       ),
       body: const Column(
-        children: [SearchPanel()],
-      ),
-      floatingActionButton: const FloatingActionButton(
-        tooltip: 'Add', // used by assistive technologies
-        onPressed: null,
-        child: Icon(Icons.add),
+        children: [
+          SearchPanel(),
+          ItemData(),
+        ],
       ),
     );
   }
@@ -63,20 +61,15 @@ class SearchPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).primaryColorLight,
-      child: const Column(
-        children: [
-          SearchPanelText(),
-          SearchPanelInput(
-            inputName: "キーワード",
-          ),
-          SearchPanelInput(
-            inputName: "価格",
-          ),
-          SearchPanelInput(
-            inputName: "メーカー",
-          ),
-        ],
+      color: Theme.of(context).colorScheme.secondaryContainer,
+      child: const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Column(
+          children: [
+            SearchPanelText(),
+            SearchPanelInputs()
+          ],
+        )
       ),
     );
   }
@@ -88,92 +81,127 @@ class SearchPanelText extends StatefulWidget {
   @override
   State<SearchPanelText> createState() => _SearchPanelTextState();
 }
-
 class _SearchPanelTextState extends State<SearchPanelText> {
-  String _item = "Mouce";
-
-  void _changeSearchItem(ItemCategory? item) {
-    if (item == null) return;
-    setState(() {
-      _item = item.label;
-    });
-  }
+  String? selectedItem;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16),
-        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 2.0),
-            child: DropdownMenu<ItemCategory>(
-                inputDecorationTheme: const InputDecorationTheme(
-                    constraints: BoxConstraints(maxHeight: 35), isDense: true),
-                initialSelection: ItemCategory.mouce,
-                onSelected: _changeSearchItem,
-                width: 128,
-                dropdownMenuEntries: ItemCategory.values
-                    .map<DropdownMenuEntry<ItemCategory>>((ItemCategory item) {
-                  return DropdownMenuEntry<ItemCategory>(
-                    value: item,
-                    label: item.label,
-                    enabled: true,
-                  );
-                }).toList()),
+            padding: const EdgeInsets.only(right: 4),
+            child: DropdownButton<String>(
+              items: ItemCategory.values.map<DropdownMenuItem<String>>(
+                  (ItemCategory item) {
+                    return DropdownMenuItem<String>(
+                      value: item.label,
+                      child: Text(item.label,
+                      style: const TextStyle(
+                          fontSize: 14,
+                          letterSpacing: 1.2,
+                          color: Colors.black
+                      ),),
+                    );
+                  }
+              ).toList(),
+              onChanged: (String? value) {
+                setState(() {
+                  selectedItem = value;
+                });
+              },
+              value: selectedItem,
+            ),
           ),
           const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 2.0),
-              child: Text("の商品検索"))
-        ]));
+            padding: EdgeInsets.only(left: 4),
+            child: Text(
+              "の検索",
+              style: TextStyle(
+                fontSize: 16,
+                letterSpacing: 1.5,
+              ),
+            ),
+          ),
+          const IconButton(
+            icon: Icon(Icons.search),
+            tooltip: "Search",
+            onPressed: null,
+          ),
+        ]
+      ),
+    );
   }
 }
 
-enum ItemCategory {
-  keyboard("Keyboard"),
-  mouce("Mouce"),
-  monitor("Monitor"),
-  headset("Headset");
-
-  const ItemCategory(this.label);
-  final String label;
-}
-
-class SearchPanelInput extends StatefulWidget {
-  final String inputName;
-  const SearchPanelInput({super.key, required this.inputName});
+class SearchPanelInputs extends StatelessWidget {
+  const SearchPanelInputs({super.key});
 
   @override
-  State<SearchPanelInput> createState() => _SearchPanelInputState();
+  Widget build(BuildContext context) {
+    return const Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(bottom: 4),
+          child: SearchPanelInputBox(
+            inputName: "キーワード",
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.symmetric(vertical: 4),
+          child: SearchPanelInputBox(
+            inputName: "価格",
+          ),
+        ),
+        Padding(
+          padding: EdgeInsets.only(top: 4),
+          child: SearchPanelInputBox(
+            inputName: "メーカー"
+          ),
+        ),
+      ],
+    );
+  }
 }
+class SearchPanelInputBox extends StatefulWidget {
+  final String inputName;
+  const SearchPanelInputBox({super.key, required this.inputName});
 
-class _SearchPanelInputState extends State<SearchPanelInput> {
+  @override
+  State<SearchPanelInputBox> createState() => _SearchPanelInputBoxState();
+}
+class _SearchPanelInputBoxState extends State<SearchPanelInputBox> {
+  String? input;
+
   @override
   Widget build(BuildContext context) {
     return Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+      padding: const EdgeInsets.symmetric(horizontal: 40),
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 2.0),
-              child: Text(widget.inputName,
-                  style: const TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.w100,
-                  )),
+            Text(
+              widget.inputName,
+              style: const TextStyle(
+                fontSize: 18
+              ),
             ),
-            const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-                child: SizedBox(
-                    child: TextField(
-                  style: TextStyle(fontSize: 32),
+            const SizedBox(
+                width: 144,
+                child: TextField (
                   decoration: InputDecoration(
-                    suffixIcon: Icon(Icons.clear),
-                    border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(5.0))),
+                    border: OutlineInputBorder(),
                   ),
-                )))
-          ],
-        ));
+                  style: TextStyle(
+                    fontSize: 16,
+                  ),
+                )
+            )
+          ]
+      ),
+    );
   }
 }
