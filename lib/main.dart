@@ -18,7 +18,7 @@ class MyApp extends StatelessWidget {
     MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
       title: 'GageGuru',
-      theme: theme.light(),
+      theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const Home(),
     );
   }
@@ -47,8 +47,16 @@ class Home extends StatelessWidget {
       ),
       body: const Column(
         children: [
-          SearchPanel(),
-          ItemData(),
+          Expanded(
+            child: SingleChildScrollView(
+              child: Column(
+                  children: [
+                    SearchPanel(),
+                    ItemDataList(),
+                  ]
+              )
+            )
+          ),
         ],
       ),
     );
@@ -61,7 +69,14 @@ class SearchPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Theme.of(context).colorScheme.secondaryContainer,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.secondaryContainer,
+        boxShadow: [
+          BoxShadow(
+            color: Theme.of(context).colorScheme.shadow
+          )
+        ]
+      ),
       child: const Padding(
         padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
         child: Column(
@@ -75,6 +90,7 @@ class SearchPanel extends StatelessWidget {
   }
 }
 
+
 class SearchPanelText extends StatefulWidget {
   const SearchPanelText({super.key});
 
@@ -87,7 +103,7 @@ class _SearchPanelTextState extends State<SearchPanelText> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -98,12 +114,10 @@ class _SearchPanelTextState extends State<SearchPanelText> {
                   (ItemCategory item) {
                     return DropdownMenuItem<String>(
                       value: item.label,
-                      child: Text(item.label,
-                      style: const TextStyle(
-                          fontSize: 14,
-                          letterSpacing: 1.2,
-                          color: Colors.black
-                      ),),
+                      child: Text(
+                        item.label,
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
                     );
                   }
               ).toList(),
@@ -112,17 +126,14 @@ class _SearchPanelTextState extends State<SearchPanelText> {
                   selectedItem = value;
                 });
               },
-              value: selectedItem,
+              value: selectedItem
             ),
           ),
-          const Padding(
-            padding: EdgeInsets.only(left: 4),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
             child: Text(
               "の検索",
-              style: TextStyle(
-                fontSize: 16,
-                letterSpacing: 1.5,
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
           ),
           const IconButton(
@@ -185,19 +196,15 @@ class _SearchPanelInputBoxState extends State<SearchPanelInputBox> {
           children: [
             Text(
               widget.inputName,
-              style: const TextStyle(
-                fontSize: 18
-              ),
+              style: Theme.of(context).textTheme.bodyLarge,
             ),
-            const SizedBox(
+            SizedBox(
                 width: 144,
                 child: TextField (
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                   ),
-                  style: TextStyle(
-                    fontSize: 16,
-                  ),
+                  style: Theme.of(context).textTheme.bodyMedium,
                 )
             )
           ]
@@ -206,6 +213,22 @@ class _SearchPanelInputBoxState extends State<SearchPanelInputBox> {
   }
 }
 
+class ItemDataList extends StatelessWidget {
+  const ItemDataList({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Column(
+      children: [
+        ItemData(),
+        ItemData(),
+        ItemData(),
+        ItemData(),
+        ItemData()
+      ],
+    );
+  }
+}
 class ItemData extends StatelessWidget {
   const ItemData({super.key});
 
@@ -222,7 +245,6 @@ class ItemData extends StatelessWidget {
     );
   }
 }
-
 class ItemDataThumbnail extends StatelessWidget {
   final String title;
   final String imgURL;
@@ -253,10 +275,7 @@ class ItemDataThumbnail extends StatelessWidget {
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
                         title,
-                        style: const TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.w500,
-                        ),
+                        style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
                     ),
@@ -273,7 +292,6 @@ class ItemDataThumbnail extends StatelessWidget {
     );
   }
 }
-
 class ItemDataThumbnailButtons extends StatelessWidget {
   const ItemDataThumbnailButtons({super.key});
 
@@ -289,11 +307,13 @@ class ItemDataThumbnailButtons extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
+            backgroundColor: Theme.of(context).colorScheme.primaryContainer,
           ),
-          child: const Text(
+          child: Text(
             "Details",
             style: TextStyle(
-              fontSize: 12
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onPrimaryContainer
             ),
           ),
         ),
@@ -304,11 +324,13 @@ class ItemDataThumbnailButtons extends StatelessWidget {
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
             ),
+            backgroundColor: Theme.of(context).colorScheme.tertiaryContainer,
           ),
-          child: const Text(
+          child: Text(
             "Official Site",
             style: TextStyle(
-                fontSize: 12
+              fontSize: 12,
+              color: Theme.of(context).colorScheme.onTertiaryContainer,
             ),
           ),
         ),
@@ -317,7 +339,6 @@ class ItemDataThumbnailButtons extends StatelessWidget {
   }
 
 }
-
 class ItemDataText extends StatelessWidget {
   final List<String> texts;
   const ItemDataText({super.key, required this.texts});
@@ -329,9 +350,7 @@ class ItemDataText extends StatelessWidget {
         padding: const EdgeInsets.only(right: 8),
         child: Text(
           text,
-          style: const TextStyle(
-            fontSize: 16
-          ),
+          style: Theme.of(context).textTheme.bodyMedium,
         )
       )).toList(),
     );
