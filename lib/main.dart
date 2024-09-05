@@ -1,6 +1,5 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
+import 'package:myapp/detail_page.dart';
 import 'util.dart';
 import 'theme.dart';
 
@@ -30,35 +29,27 @@ class Home extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: const IconButton(
-          icon: Icon(Icons.menu),
-          tooltip: "Nav menu",
-          onPressed: null,
-        ),
-        title: const Text("Gage Guru"),
-        actions: const [
-          IconButton(
-            icon: Icon(Icons.search),
-            tooltip: "Search",
-            onPressed: null,
-          ),
-        ],
-      ),
-      body: const Column(
-        children: [
-          Expanded(
-            child: SingleChildScrollView(
-              child: Column(
-                  children: [
-                    SearchPanel(),
-                    ItemDataList(),
-                  ]
-              )
-            )
-          ),
-        ],
-      ),
+        body: SafeArea(
+          top: false,
+          child: Container(
+            padding: const EdgeInsets.only(top: 48.0),
+            color: Theme.of(context).colorScheme.surface,
+            child: const Column(
+              children: [
+                Expanded(
+                    child: SingleChildScrollView(
+                        child: Column(
+                            children: [
+                              SearchPanel(),
+                              ItemDataList(),
+                            ]
+                        )
+                    )
+                ),
+              ],
+            ),
+          )
+        )
     );
   }
 }
@@ -70,7 +61,7 @@ class SearchPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
+        color: Theme.of(context).colorScheme.surfaceContainer,
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).colorScheme.shadow
@@ -89,7 +80,6 @@ class SearchPanel extends StatelessWidget {
     );
   }
 }
-
 
 class SearchPanelText extends StatefulWidget {
   const SearchPanelText({super.key});
@@ -299,10 +289,15 @@ class ItemDataThumbnailButtons extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      mainAxisAlignment: MainAxisAlignment.center,
       children: [
         ElevatedButton(
-          onPressed: () {},
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const DetailPage()),
+            );
+          },
           style: ElevatedButton.styleFrom(
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(6),
