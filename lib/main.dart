@@ -1,10 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:myapp/detail_page.dart';
+import 'package:myapp/providers/category.dart';
+import 'package:myapp/providers/keywords.dart';
+import 'package:myapp/providers/maker.dart';
+import 'package:myapp/providers/price.dart';
+import 'package:provider/provider.dart';
 import 'util.dart';
 import 'theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => CategoryModel()),
+        ChangeNotifierProvider(create: (context) => PriceModel()),
+        ChangeNotifierProvider(create: (context) => KeyWordsModel()),
+        ChangeNotifierProvider(create: (context) => MakerModel()),
+      ],
+      child: const MyApp(),
+    )
+  );
 }
 
 class MyApp extends StatelessWidget {
