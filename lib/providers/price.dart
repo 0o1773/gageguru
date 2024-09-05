@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class PriceModel extends ChangeNotifier {
   int minPrice = 0;
-  int maxPrice = double.infinity as int;
+  int? maxPrice = null;
 
   void setMinPrice(int minPrice) {
     this.minPrice = minPrice;

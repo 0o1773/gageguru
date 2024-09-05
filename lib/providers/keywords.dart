@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 class KeyWordsModel extends ChangeNotifier {
   String keyword = "";
 
-  void SetKeyword(String keyword) {
+  void setKeyword(String keyword) {
     this.keyword = keyword;
   }
 }

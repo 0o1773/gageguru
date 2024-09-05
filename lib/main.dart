@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:myapp/detail_page.dart';
 import 'package:myapp/providers/category.dart';
 import 'package:myapp/providers/keywords.dart';
@@ -14,8 +15,8 @@ void main() {
       providers: [
         ChangeNotifierProvider(create: (context) => CategoryModel()),
         ChangeNotifierProvider(create: (context) => PriceModel()),
-        ChangeNotifierProvider(create: (context) => KeyWordsModel()),
         ChangeNotifierProvider(create: (context) => MakerModel()),
+        ChangeNotifierProvider(create: (context) => KeyWordsModel()),
       ],
       child: const MyApp(),
     )
@@ -96,57 +97,51 @@ class SearchPanel extends StatelessWidget {
   }
 }
 
-class SearchPanelText extends StatefulWidget {
+class SearchPanelText extends StatelessWidget {
   const SearchPanelText({super.key});
 
   @override
-  State<SearchPanelText> createState() => _SearchPanelTextState();
-}
-class _SearchPanelTextState extends State<SearchPanelText> {
-  String? selectedItem;
-
-  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 4),
-            child: DropdownButton<String>(
-              items: ItemCategory.values.map<DropdownMenuItem<String>>(
-                  (ItemCategory item) {
-                    return DropdownMenuItem<String>(
-                      value: item.label,
-                      child: Text(
-                        item.label,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                      ),
-                    );
-                  }
-              ).toList(),
-              onChanged: (String? value) {
-                setState(() {
-                  selectedItem = value;
-                });
-              },
-              value: selectedItem
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 4),
-            child: Text(
-              "の検索",
-              style: Theme.of(context).textTheme.bodyMedium,
-            ),
-          ),
-          const IconButton(
-            icon: Icon(Icons.search),
-            tooltip: "Search",
-            onPressed: null,
-          ),
-        ]
+    return Consumer<CategoryModel>(
+      builder: (context, category, child) => Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Padding(
+                padding: const EdgeInsets.only(right: 4),
+                child: DropdownButton<String>(
+                    items: ItemCategory.values.map<DropdownMenuItem<String>>(
+                            (ItemCategory item) {
+                          return DropdownMenuItem<String>(
+                            value: item.name,
+                            child: Text(
+                              item.label,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                          );
+                        }
+                    ).toList(),
+                    onChanged: (String? value) {
+                      category.set(ItemCategory.values.byName(value!));
+                    },
+                    value: category.category.name
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(left: 4),
+                child: Text(
+                  "の検索",
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ),
+              const IconButton(
+                icon: Icon(Icons.search),
+                tooltip: "Search",
+                onPressed: null,
+              ),
+            ]
+        ),
       ),
     );
   }
@@ -162,57 +157,144 @@ class SearchPanelInputs extends StatelessWidget {
       children: [
         Padding(
           padding: EdgeInsets.only(bottom: 4),
-          child: SearchPanelInputBox(
-            inputName: "キーワード",
-          ),
+          child: KeywordInput(),
         ),
         Padding(
           padding: EdgeInsets.symmetric(vertical: 4),
-          child: SearchPanelInputBox(
-            inputName: "価格",
-          ),
+          child: PriceInput(),
         ),
         Padding(
           padding: EdgeInsets.only(top: 4),
-          child: SearchPanelInputBox(
-            inputName: "メーカー"
-          ),
+          child: MakerInput(),
         ),
       ],
     );
   }
 }
-class SearchPanelInputBox extends StatefulWidget {
-  final String inputName;
-  const SearchPanelInputBox({super.key, required this.inputName});
 
-  @override
-  State<SearchPanelInputBox> createState() => _SearchPanelInputBoxState();
-}
-class _SearchPanelInputBoxState extends State<SearchPanelInputBox> {
-  String? input;
+class KeywordInput extends StatelessWidget {
+  const KeywordInput({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 40),
-      child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              widget.inputName,
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            SizedBox(
-                width: 144,
-                child: TextField (
-                  decoration: const InputDecoration(
-                    border: OutlineInputBorder(),
+    return Consumer<KeyWordsModel> (
+      builder: (context, model, child) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "キーボード",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              SizedBox(
+                  width: 144,
+                  child: TextField (
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    onSubmitted: (word) {
+                      model.setKeyword(word);
+                    },
+                  )
+              )
+            ]
+        ),
+      ),
+    );
+  }
+}
+class MakerInput extends StatelessWidget {
+  const MakerInput({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<MakerModel> (
+      builder: (context, model, child) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "メーカー",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              SizedBox(
+                  width: 144,
+                  child: TextField (
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    onSubmitted: (word) {
+                      model.setMaker(word);
+                    },
+                  )
+              )
+            ]
+        ),
+      ),
+    );
+  }
+}
+class PriceInput extends StatelessWidget {
+  const PriceInput({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Consumer<PriceModel> (
+      builder: (context, model, child) => Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 40),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                "価格",
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+              Wrap(
+                children: [
+
+                  SizedBox(
+                      width: 68,
+                      child: TextField (
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        onSubmitted: (p) {
+                          model.setMinPrice(p as int);
+                        },
+                      )
                   ),
-                  style: Theme.of(context).textTheme.bodyMedium,
-                )
-            )
-          ]
+                  const SizedBox(
+                      width: 8
+                  ),
+                  SizedBox(
+                      width: 68,
+                      child: TextField (
+                        keyboardType: TextInputType.number,
+                        inputFormatters: [
+                          FilteringTextInputFormatter.digitsOnly,
+                        ],
+                        decoration: const InputDecoration(
+                          border: OutlineInputBorder(),
+                        ),
+                        style: Theme.of(context).textTheme.bodyMedium,
+                        onSubmitted: (p) {
+                          model.setMaxPrice(int.parse(p));
+                        },
+                      )
+                  )
+                ],
+              )
+            ]
+        ),
       ),
     );
   }
