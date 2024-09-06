@@ -1,26 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:myapp/detail_page.dart';
-import 'package:myapp/providers/category.dart';
-import 'package:myapp/providers/keywords.dart';
-import 'package:myapp/providers/maker.dart';
-import 'package:myapp/providers/price.dart';
+import 'package:gageguru/db/classes.dart';
+import 'package:gageguru/db/db.dart';
+import 'package:gageguru/detail_page.dart';
+import 'package:gageguru/providers/category.dart';
+import 'package:gageguru/providers/keywords.dart';
+import 'package:gageguru/providers/maker.dart';
+import 'package:gageguru/providers/price.dart';
 import 'package:provider/provider.dart';
 import 'util.dart';
 import 'theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => CategoryModel()),
-        ChangeNotifierProvider(create: (context) => PriceModel()),
-        ChangeNotifierProvider(create: (context) => MakerModel()),
-        ChangeNotifierProvider(create: (context) => KeyWordsModel()),
-      ],
-      child: const MyApp(),
-    )
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
+  runApp(MultiProvider(
+    providers: [
+      ChangeNotifierProvider(create: (context) => CategoryModel()),
+      ChangeNotifierProvider(create: (context) => PriceModel()),
+      ChangeNotifierProvider(create: (context) => MakerModel()),
+      ChangeNotifierProvider(create: (context) => KeyWordsModel()),
+    ],
+    child: const MyApp(),
+  ));
 }
 
 class MyApp extends StatelessWidget {
@@ -47,27 +54,21 @@ class Home extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
         body: SafeArea(
-          top: false,
-          child: Container(
-            padding: const EdgeInsets.only(top: 48.0),
-            color: Theme.of(context).colorScheme.surface,
-            child: const Column(
-              children: [
-                Expanded(
-                    child: SingleChildScrollView(
-                        child: Column(
-                            children: [
-                              SearchPanel(),
-                              ItemDataList(),
-                            ]
-                        )
-                    )
-                ),
-              ],
-            ),
-          )
-        )
-    );
+            top: false,
+            child: Container(
+              padding: const EdgeInsets.only(top: 48.0),
+              color: Theme.of(context).colorScheme.surface,
+              child: const Column(
+                children: [
+                  Expanded(
+                      child: SingleChildScrollView(
+                          child: Column(children: [
+                    SearchPanel(),
+                    ItemDataList(),
+                  ]))),
+                ],
+              ),
+            )));
   }
 }
 
@@ -78,22 +79,13 @@ class SearchPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        boxShadow: [
-          BoxShadow(
-            color: Theme.of(context).colorScheme.shadow
-          )
-        ]
-      ),
+          color: Theme.of(context).colorScheme.surfaceContainer,
+          boxShadow: [BoxShadow(color: Theme.of(context).colorScheme.shadow)]),
       child: const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-        child: Column(
-          children: [
-            SearchPanelText(),
-            SearchPanelInputs()
-          ],
-        )
-      ),
+          padding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+          child: Column(
+            children: [SearchPanelText(), SearchPanelInputs()],
+          )),
     );
   }
 }
@@ -106,43 +98,38 @@ class SearchPanelText extends StatelessWidget {
     return Consumer<CategoryModel>(
       builder: (context, category, child) => Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(right: 4),
-                child: DropdownButton<String>(
-                    items: ItemCategory.values.map<DropdownMenuItem<String>>(
-                            (ItemCategory item) {
-                          return DropdownMenuItem<String>(
-                            value: item.name,
-                            child: Text(
-                              item.label,
-                              style: Theme.of(context).textTheme.bodyMedium,
-                            ),
-                          );
-                        }
-                    ).toList(),
-                    onChanged: (String? value) {
-                      category.set(ItemCategory.values.byName(value!));
-                    },
-                    value: category.category.name
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(left: 4),
-                child: Text(
-                  "の検索",
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ),
-              const IconButton(
-                icon: Icon(Icons.search),
-                tooltip: "Search",
-                onPressed: null,
-              ),
-            ]
-        ),
+        child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+          Padding(
+            padding: const EdgeInsets.only(right: 4),
+            child: DropdownButton<String>(
+                items: ItemCategory.values
+                    .map<DropdownMenuItem<String>>((ItemCategory item) {
+                  return DropdownMenuItem<String>(
+                    value: item.name,
+                    child: Text(
+                      item.label,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  );
+                }).toList(),
+                onChanged: (String? value) {
+                  category.set(ItemCategory.values.byName(value!));
+                },
+                value: category.category.name),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(left: 4),
+            child: Text(
+              "の検索",
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ),
+          const IconButton(
+            icon: Icon(Icons.search),
+            tooltip: "Search",
+            onPressed: null,
+          ),
+        ]),
       ),
     );
   }
@@ -178,211 +165,248 @@ class KeywordInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<KeyWordsModel> (
+    return Consumer<KeyWordsModel>(
       builder: (context, model, child) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "キーボード",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              SizedBox(
-                  width: 144,
-                  child: TextField (
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    onSubmitted: (word) {
-                      model.setKeyword(word);
-                    },
-                  )
-              )
-            ]
-        ),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(
+            "キーボード",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          SizedBox(
+              width: 144,
+              child: TextField(
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+                onSubmitted: (word) {
+                  model.setKeyword(word);
+                },
+              ))
+        ]),
       ),
     );
   }
 }
+
 class MakerInput extends StatelessWidget {
   const MakerInput({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MakerModel> (
+    return Consumer<MakerModel>(
       builder: (context, model, child) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "メーカー",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              SizedBox(
-                  width: 144,
-                  child: TextField (
-                    decoration: const InputDecoration(
-                      border: OutlineInputBorder(),
-                    ),
-                    style: Theme.of(context).textTheme.bodyMedium,
-                    onSubmitted: (word) {
-                      model.setMaker(word);
-                    },
-                  )
-              )
-            ]
-        ),
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(
+            "メーカー",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          SizedBox(
+              width: 144,
+              child: TextField(
+                decoration: const InputDecoration(
+                  border: OutlineInputBorder(),
+                ),
+                style: Theme.of(context).textTheme.bodyMedium,
+                onSubmitted: (word) {
+                  model.setMaker(word);
+                },
+              ))
+        ]),
       ),
     );
   }
 }
+
 class PriceInput extends StatelessWidget {
   const PriceInput({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<PriceModel> (
+    return Consumer<PriceModel>(
       builder: (context, model, child) => Padding(
         padding: const EdgeInsets.symmetric(horizontal: 40),
-        child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child:
+            Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+          Text(
+            "価格",
+            style: Theme.of(context).textTheme.bodyLarge,
+          ),
+          Wrap(
             children: [
-              Text(
-                "価格",
-                style: Theme.of(context).textTheme.bodyLarge,
-              ),
-              Wrap(
-                children: [
-
-                  SizedBox(
-                      width: 68,
-                      child: TextField (
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        onSubmitted: (p) {
-                          model.setMinPrice(p as int);
-                        },
-                      )
-                  ),
-                  const SizedBox(
-                      width: 8
-                  ),
-                  SizedBox(
-                      width: 68,
-                      child: TextField (
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(),
-                        ),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        onSubmitted: (p) {
-                          model.setMaxPrice(int.parse(p));
-                        },
-                      )
-                  )
-                ],
-              )
-            ]
-        ),
+              SizedBox(
+                  width: 68,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    onSubmitted: (p) {
+                      model.setMinPrice(p as int);
+                    },
+                  )),
+              const SizedBox(width: 8),
+              SizedBox(
+                  width: 68,
+                  child: TextField(
+                    keyboardType: TextInputType.number,
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly,
+                    ],
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(),
+                    ),
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    onSubmitted: (p) {
+                      model.setMaxPrice(int.parse(p));
+                    },
+                  ))
+            ],
+          )
+        ]),
       ),
     );
   }
 }
 
-class ItemDataList extends StatelessWidget {
+class ItemDataList extends StatefulWidget {
   const ItemDataList({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        ItemData(),
-        ItemData(),
-        ItemData(),
-        ItemData(),
-        ItemData()
-      ],
-    );
-  }
+  State<ItemDataList> createState() => _ItemDataListState();
 }
-class ItemData extends StatelessWidget {
-  const ItemData({super.key});
+
+class _ItemDataListState extends State<ItemDataList> {
+  var db = FirebaseFirestore.instance;
+  bool isLoading = false;
+  List<Mouse> mouseList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    getItemList();
+  }
+
+  Future getItemList() async {
+    setState(() => isLoading = true);
+    await db
+        .collection("mouse")
+        .withConverter<Mouse>(
+            fromFirestore: (snapshot, _) => Mouse.fromJson(snapshot.data()!),
+            toFirestore: (mouse, _) => mouse.toJson())
+        .get()
+        .then((event) {
+      print(event);
+      mouseList = event.docs.map((doc) => doc.data()).toList();
+      setState(() => isLoading = false);
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return isLoading == true
+        ? const CircularProgressIndicator()
+        : Column(
+            children: mouseList
+                .map((e) => ItemData(
+                      name: e.name,
+                      imgURL: e.imageUrl,
+                      texts: [
+                        "Colors: ${e.colors.join(" / ")}",
+                        "Connection: ${e.connection.join(" / ")}",
+                        "${e.weight}g",
+                        "${e.polling}Hz"
+                      ],
+                    ))
+                .toList(),
+          );
+  }
+}
+
+class ItemData extends StatelessWidget {
+  List<String> texts = [];
+  String name = "";
+  String? imgURL = "";
+
+  ItemData(
+      {super.key,
+      required this.name,
+      required this.imgURL,
+      required this.texts});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
         ItemDataThumbnail(
-          title: "Pulsar Xlite V3 Midium",
-          imgURL: "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
+          title: name,
+          imgURL: imgURL ??
+              "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
         ),
-        ItemDataText(texts: ["Size: S/M/L", "Colors: Black / Red / White", "Connection: Wireless / Wired", "50g", "8000Hz"],)
+        ItemDataText(
+          texts: texts,
+        )
       ],
     );
   }
 }
+
 class ItemDataThumbnail extends StatelessWidget {
   final String title;
   final String imgURL;
-  const ItemDataThumbnail({super.key, required this.title, required this.imgURL});
+  const ItemDataThumbnail(
+      {super.key, required this.title, required this.imgURL});
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.network(
-              "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
-              width: 128,
-              height: 128,
-            )
-          ),
-          Flexible(
-            child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.only(bottom: 8),
-                      child: Text(
-                        title,
-                        style: Theme.of(context).textTheme.headlineSmall,
-                        textAlign: TextAlign.center,
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.network(
+                  "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
+                  width: 128,
+                  height: 128,
+                )),
+            Flexible(
+              child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Text(
+                          title,
+                          style: Theme.of(context).textTheme.headlineSmall,
+                          textAlign: TextAlign.center,
+                        ),
                       ),
-                    ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: ItemDataThumbnailButtons(),
-                    )
-                  ],
-                )
+                      const Padding(
+                        padding: EdgeInsets.only(top: 8),
+                        child: ItemDataThumbnailButtons(),
+                      )
+                    ],
+                  )),
             ),
-          ),
-        ],
-      )
-    );
+          ],
+        ));
   }
 }
+
 class ItemDataThumbnailButtons extends StatelessWidget {
   const ItemDataThumbnailButtons({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -405,9 +429,8 @@ class ItemDataThumbnailButtons extends StatelessWidget {
           child: Text(
             "Details",
             style: TextStyle(
-              fontSize: 12,
-              color: Theme.of(context).colorScheme.onPrimaryContainer
-            ),
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.onPrimaryContainer),
           ),
         ),
         const SizedBox(width: 16),
@@ -430,8 +453,8 @@ class ItemDataThumbnailButtons extends StatelessWidget {
       ],
     );
   }
-
 }
+
 class ItemDataText extends StatelessWidget {
   final List<String> texts;
   const ItemDataText({super.key, required this.texts});
@@ -439,13 +462,14 @@ class ItemDataText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Wrap(
-      children: texts.map((text) => Padding(
-        padding: const EdgeInsets.only(right: 8),
-        child: Text(
-          text,
-          style: Theme.of(context).textTheme.bodyMedium,
-        )
-      )).toList(),
+      children: texts
+          .map((text) => Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                text,
+                style: Theme.of(context).textTheme.bodyMedium,
+              )))
+          .toList(),
     );
   }
 }

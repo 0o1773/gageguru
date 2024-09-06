@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "31535120185",
+    "project_id": "gageguru-dfd43",
+    "storage_bucket": "gageguru-dfd43.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:31535120185:android:bc5e23c40a3f3325a2b2e8",
+        "android_client_info": {
+          "package_name": "com.gageguru"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBdiNvxg7yjPpoMiRHNJFBz846ku71t7TU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
