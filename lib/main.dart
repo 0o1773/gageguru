@@ -32,6 +32,7 @@ class MyApp extends StatelessWidget {
     TextTheme textTheme = createTextTheme(context, "M PLUS 1p", "M PLUS 2");
     MaterialTheme theme = MaterialTheme(textTheme);
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'GageGuru',
       theme: brightness == Brightness.light ? theme.light() : theme.dark(),
       home: const Home(),
