@@ -1,44 +1,80 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class DetailPage extends StatelessWidget {
-  const DetailPage({super.key});
+class DetailPage extends StatefulWidget {
+  final String itemID;
+  const DetailPage({super.key, required this.itemID});
+
+  @override
+  _DetailPageState createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<DetailPage> {
+  Map<String, dynamic> itemData = {};
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    getItemData();
+  }
+
+  Future<void> getItemData() async {
+    setState(() {
+      isLoading = true;
+    });
+    var db = FirebaseFirestore.instance;
+    await db
+      .collection("mouse")
+      .doc(widget.itemID)
+      .get()
+      .then((e) => itemData = e.data()!);
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Pulsar Xlite V3")
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surface,
+    return isLoading
+      ? const Center(
+          child: const CircularProgressIndicator(),
+        )
+      : Scaffold(
+        appBar: AppBar(
+            title: Text(itemData["name"])
         ),
-        child: ListView(
-          children: [
-            Image.network(
-              "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
-            ),
-            Divider(
-              thickness: 1,
-              indent: 0,
-              endIndent: 0,
-              color: Theme.of(context).colorScheme.onSurface
-            ),
-            const ItemTitle(title: "Pulsar Xlite V3",),
-            const SeparateLine(),
-            const ItemDetail(),
-            const SeparateLine(),
-            const DescriptionText(),
-            const BuyButtons(),
-          ],
-        ),
-      )
+        body: Container(
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surface,
+          ),
+          child: ListView(
+            children: [
+              Image.network(
+                itemData["image_url"],
+              ),
+              Divider(
+                  thickness: 1,
+                  indent: 0,
+                  endIndent: 0,
+                  color: Theme.of(context).colorScheme.onSurface
+              ),
+              ItemTitle(title: itemData["name"],),
+              const SeparateLine(),
+              ItemDetail(itemData: itemData,),
+              const SeparateLine(),
+              DescriptionText(text: itemData["description"]),
+              const BuyButtons(),
+            ],
+          ),
+        )
     );
   }
 }
 
 class ItemDetail extends StatelessWidget {
-  const ItemDetail({super.key});
+  final Map<String, dynamic> itemData;
+  const ItemDetail({super.key, required this.itemData});
 
   @override
   Widget build(BuildContext context) {
@@ -49,23 +85,21 @@ class ItemDetail extends StatelessWidget {
       ),
       child: Column(
         children: [
-          const ItemDetailTable(title: "ポーリングレート", content: "4000Hz / 8000Hz"),
+          ItemDetailTable(title: "ポーリングレート", content: "${itemData["polling"]}Hz"),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "最高DPI", content: "28000DPI"),
+          ItemDetailTable(title: "最高DPI", content: "${itemData["max_dpi"]}DPI"),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "カラー", content: "Red / Black / White"),
+          ItemDetailTable(title: "カラー", content: itemData["colors"].join(" / ")),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "接続方法", content: "有線 / 無線"),
+          ItemDetailTable(title: "接続方法", content: itemData["connection"].join(" / ")),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "重量", content: "55g"),
+          ItemDetailTable(title: "重量", content: "${itemData["weight"]}g"),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "サイズ", content: "S / M / L"),
+          ItemDetailTable(title: "バッテリー持ち", content: "Max ${itemData["battery"]}h"),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "バッテリー持ち", content: "最大100時間（メーカー公称値）"),
+          ItemDetailTable(title: "形状", content: itemData["shape"]),
           SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "形状", content: "エルゴノミクス右手"),
-          SeparateLine(color: Theme.of(context).colorScheme.onSurface,),
-          const ItemDetailTable(title: "スイッチ", content: "光学式"),
+          ItemDetailTable(title: "スイッチ", content: itemData["switch_type"]),
         ],
       ),
     );
@@ -116,14 +150,15 @@ class SeparateLine extends StatelessWidget {
   }
 }
 class DescriptionText extends StatelessWidget {
-  const DescriptionText({super.key});
+  final String text;
+  const DescriptionText({super.key, required this.text});
 
   @override
   Widget build(BuildContext context) {
     return Container(
         padding: const EdgeInsets.symmetric(horizontal: 16 , vertical: 16),
         child: Text(
-            "Xlite V3ゲーミングマウスは、右手のパームグリップ用に設計され、快適な使い心地を提供します。PAW3395センサーや高速オプティカルスイッチを搭載し、遅延のないワイヤレス接続と長時間のバッテリー寿命で、競技eスポーツにも最適です。",
+            text,
             style: Theme.of(context).textTheme.bodyMedium
         )
     );

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:gageguru/detail_page.dart';
@@ -6,10 +8,15 @@ import 'package:gageguru/providers/keywords.dart';
 import 'package:gageguru/providers/maker.dart';
 import 'package:gageguru/providers/price.dart';
 import 'package:provider/provider.dart';
+import 'firebase_options.dart';
 import 'util.dart';
 import 'theme.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(
     MultiProvider(
       providers: [
@@ -301,42 +308,89 @@ class PriceInput extends StatelessWidget {
   }
 }
 
-class ItemDataList extends StatelessWidget {
+class ItemDataList extends StatefulWidget {
   const ItemDataList({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        ItemData(),
-        ItemData(),
-        ItemData(),
-        ItemData(),
-        ItemData()
-      ],
-    );
-  }
+  _ItemDataListState createState() => _ItemDataListState();
 }
-class ItemData extends StatelessWidget {
-  const ItemData({super.key});
+class _ItemDataListState extends State<ItemDataList> {
+  Map<String, Map<String, dynamic>> itemData = {};
+  List<Widget> items = [];
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    getData();
+  }
+
+
+  Future<void> getData() async {
+    setState(() {
+      isLoading = true;
+    });
+    final db = FirebaseFirestore.instance;
+    await db
+      .collection("mouse")
+      .get()
+      .then((e) {
+        for (var doc in e.docs) {
+          Map<String, Map<String, dynamic>> item = {
+            doc.id: doc.data()
+          };
+          itemData.addAll(item);
+        }
+    });
+    itemData.forEach((key, value) => items.add(ItemData(itemID: key, name: value["name"], imageURL: value["image_url"], itemDataTexts: [
+      "Color: ${value["colors"].join(" / ")}",
+      "Connection: ${value["connection"].join(" / ")}",
+      "PollingRate: ${value["polling"]}Hz",
+      "ReactionRate: ${value["reaction_time"]}ms",
+      "${value["weight"]}g",
+    ])));
+    print(itemData.length);
+    setState(() {
+      isLoading = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    return isLoading
+        ? const Text("Loading")
+        : Column(
+            children: items,
+          );
+  }
+}
+
+class ItemData extends StatelessWidget {
+  final String name;
+  final String itemID;
+  final String? imageURL;
+  final List<String> itemDataTexts;
+  const ItemData({super.key, required this.itemID, required this.name, required this.itemDataTexts, this.imageURL});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
       children: [
         ItemDataThumbnail(
-          title: "Pulsar Xlite V3 Midium",
-          imgURL: "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
+          itemID: itemID,
+          name: name,
+          imgURL: imageURL,
         ),
-        ItemDataText(texts: ["Size: S/M/L", "Colors: Black / Red / White", "Connection: Wireless / Wired", "50g", "8000Hz"],)
+        ItemDataText(texts: itemDataTexts)
       ],
     );
   }
 }
 class ItemDataThumbnail extends StatelessWidget {
-  final String title;
-  final String imgURL;
-  const ItemDataThumbnail({super.key, required this.title, required this.imgURL});
+  final String name;
+  final String itemID;
+  final String? imgURL;
+  const ItemDataThumbnail({super.key, required this.itemID, required this.name, this.imgURL});
 
   @override
   Widget build(BuildContext context) {
@@ -348,7 +402,7 @@ class ItemDataThumbnail extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(20),
             child: Image.network(
-              "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
+              imgURL ?? "https://pulsargg.jp/cdn/shop/files/Pulsar-Xlite-V3-es-Wireless-mouse_Size2_white_001-562537_large.png",
               width: 128,
               height: 128,
             )
@@ -362,14 +416,16 @@ class ItemDataThumbnail extends StatelessWidget {
                     Padding(
                       padding: const EdgeInsets.only(bottom: 8),
                       child: Text(
-                        title,
+                        name,
                         style: Theme.of(context).textTheme.headlineSmall,
                         textAlign: TextAlign.center,
                       ),
                     ),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 8),
-                      child: ItemDataThumbnailButtons(),
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: ItemDataThumbnailButtons(
+                        itemID: itemID,
+                      ),
                     )
                   ],
                 )
@@ -381,7 +437,8 @@ class ItemDataThumbnail extends StatelessWidget {
   }
 }
 class ItemDataThumbnailButtons extends StatelessWidget {
-  const ItemDataThumbnailButtons({super.key});
+  final String itemID;
+  const ItemDataThumbnailButtons({super.key, required this.itemID});
 
 
   @override
@@ -393,7 +450,7 @@ class ItemDataThumbnailButtons extends StatelessWidget {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const DetailPage()),
+              MaterialPageRoute(builder: (context) => DetailPage(itemID: itemID)),
             );
           },
           style: ElevatedButton.styleFrom(
