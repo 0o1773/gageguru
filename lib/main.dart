@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:myapp/detail_page.dart';
-import 'package:myapp/providers/category.dart';
-import 'package:myapp/providers/keywords.dart';
-import 'package:myapp/providers/maker.dart';
-import 'package:myapp/providers/price.dart';
+import 'package:gageguru/detail_page.dart';
+import 'package:gageguru/providers/category.dart';
+import 'package:gageguru/providers/keywords.dart';
+import 'package:gageguru/providers/maker.dart';
+import 'package:gageguru/providers/price.dart';
 import 'package:provider/provider.dart';
 import 'util.dart';
 import 'theme.dart';
