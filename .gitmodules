@@ -1,0 +1,4 @@
+[submodule "proto"]
+	path = proto
+	url = git@github.com:0o1773/hackathon-backend.git
+	branch = main
