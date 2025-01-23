@@ -1,5 +1,8 @@
+import 'package:gageguru/grpc_gen/mouse.pb.dart';
 import 'package:grpc/grpc.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+
+import '../grpc_gen/mouse.pbgrpc.dart';
 
 final gRpcChannelProvider = Provider.autoDispose((ref) {
   return ClientChannel(
@@ -18,6 +21,11 @@ class ItemDataService {
     await channel.shutdown();
   }
 
-  Future<void> getItem() async {
+  Future<Mouse> getItem() async {
+    final stub = MouseServiceClient(channel);
+    final response = await stub.get(
+      GetMouseRequest(),
+    );
+    return response;
   }
 }
